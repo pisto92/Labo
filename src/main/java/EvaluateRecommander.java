@@ -1,3 +1,5 @@
+
+
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.*;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -6,17 +8,13 @@ import org.apache.mahout.cf.taste.impl.eval.GenericRecommenderIRStatsEvaluator;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
 import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
-import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefUserBasedRecommender;
-import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
-import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
 import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
 import java.io.File;
@@ -34,6 +32,20 @@ public class EvaluateRecommander {
 
     public static void main(String[] args) throws IOException, TasteException {
 
+//        try{
+//            //Creating data model
+//            DataModel datamodel = new FileDataModel(new File("dati/data")); //data
+//            //Creating UserSimilarity object.
+//            UserSimilarity usersimilarity = new PearsonCorrelationSimilarity(datamodel);
+//            //Creating UserNeighbourHHood object.
+//            UserNeighborhood userneighborhood = new ThresholdUserNeighborhood(1.0, usersimilarity, datamodel);
+//            //Create UserRecomender
+//            UserBasedRecommender recommender = new GenericUserBasedRecommender(datamodel, userneighborhood, usersimilarity);
+//            List<RecommendedItem> recommendations = recommender.recommend(2, 3);
+//            for (RecommendedItem recommendation : recommendations) {
+//                System.out.println(recommendation);
+//            }
+//        }catch(Exception e){}
         afterPropertiesSet();
         testData();
     }
@@ -41,11 +53,11 @@ public class EvaluateRecommander {
     public static void afterPropertiesSet() throws IOException, TasteException {
 
         trainingModel = new GenericBooleanPrefDataModel(
-                GenericBooleanPrefDataModel.toDataMap(new FileDataModel(new File("dati/file1.csv")))
+                GenericBooleanPrefDataModel.toDataMap(new FileDataModel(new File("dati/datasetFilm")))
         );
 
         recommendationModel = new GenericBooleanPrefDataModel(
-                GenericBooleanPrefDataModel.toDataMap(new FileDataModel(new File("dati/file2.csv")))
+                GenericBooleanPrefDataModel.toDataMap(new FileDataModel(new File("dati/testFilm")))
         );
 
         evaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
@@ -58,7 +70,7 @@ public class EvaluateRecommander {
 //                UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, trainingModel);
 //                return new GenericUserBasedRecommender(trainingModel, neighborhood, similarity);
                 UserSimilarity similarity = new LogLikelihoodSimilarity(trainingModel);
-                UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, 0.7, similarity, model);
+                UserNeighborhood neighborhood = new NearestNUserNeighborhood(1, 0.7, similarity, model);
                 return new GenericBooleanPrefUserBasedRecommender(model, neighborhood, similarity);
             }
         };

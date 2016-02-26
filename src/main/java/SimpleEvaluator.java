@@ -23,7 +23,7 @@ public class SimpleEvaluator {
             //Creating UserSimilarity object.
             UserSimilarity usersimilarity = new PearsonCorrelationSimilarity(datamodel);
             //Creating UserNeighbourHHood object.
-            UserNeighborhood userneighborhood = new ThresholdUserNeighborhood(10, usersimilarity, datamodel);
+            UserNeighborhood userneighborhood = new ThresholdUserNeighborhood(1, usersimilarity, datamodel);
             //Create UserRecomender
             UserBasedRecommender recommender = new GenericUserBasedRecommender(datamodel, userneighborhood, usersimilarity);
             List<RecommendedItem> recommendations = recommender.recommend(138448, 10);

@@ -21,6 +21,7 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
+import org.apache.mahout.common.IntegerTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,8 +39,10 @@ public class EvaluateRecommander {
     private static DataModelBuilder modelBuilder;
     private static RecommenderBuilder recommenderItemBased;
     private static GenericBooleanPrefDataModel GB;
+    private static Genres genres;
 
     public static void main(String[] args) throws Exception {
+        genres = new Genres();
         afterPropertiesSet();
         testData();
         testTopItems();
@@ -98,16 +101,31 @@ public class EvaluateRecommander {
 
         LongPrimitiveIterator iterator = trainingModel.getUserIDs();
         while (iterator.hasNext()) {
-            List<RecommendedItem> recommendations = recommenderUserBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
-            System.out.print(iterator.nextLong() + " => [ ");
-            for (RecommendedItem recommendation : recommendations) {
-                System.out.print(recommendation.getItemID());
-                System.out.print(" ");
-            }
-            System.out.println("]");
-
+            List<RecommendedItem> recommendationsUserBased = recommenderUserBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
+            List<RecommendedItem> recommendationsItemBased = recommenderItemBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
+            System.out.println(iterator.nextLong());
+            printUserBaseRecommendation(recommendationsUserBased);
+            printItemBaseRecommendation(recommendationsItemBased);
         }
 
+    }
+
+    private static void printItemBaseRecommendation(List<RecommendedItem> recommendationsItemBased) {
+        System.out.print("ItemBase: [ ");
+        for (RecommendedItem recommendation : recommendationsItemBased) {
+            System.out.print(genres.getGenreById(""+recommendation.getItemID()));
+            System.out.print(" ");
+        }
+        System.out.println("]");
+    }
+
+    private static void printUserBaseRecommendation(List<RecommendedItem> recommendationsUserBased) {
+        System.out.print("UserBase: [ ");
+        for (RecommendedItem recommendation : recommendationsUserBased) {
+            System.out.print(genres.getGenreById(""+recommendation.getItemID()));
+            System.out.print(" ");
+        }
+        System.out.println("]");
     }
 
     public static void testTopItems() throws Exception {

@@ -45,9 +45,9 @@ public class EvaluateRecommander {
 
     public static void afterPropertiesSet() throws IOException, TasteException {
 
-        trainingModel = new FileDataModel(new File("dati/datasetFilm"));
+        trainingModel = new FileDataModel(new File("dati/userId-genreId-rating0-5.csv"));
 
-        recommendationModel = new FileDataModel(new File("dati/testFilm"));
+        recommendationModel = new FileDataModel(new File("dati/userId-genreId-rating0-5.csv"));
 
         averageEvaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
         genericEvaluator = new GenericRecommenderIRStatsEvaluator();
@@ -87,26 +87,26 @@ public class EvaluateRecommander {
 
         evaluateStats();
 
-        List<RecommendedItem> recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(138448, 3);
+        List<RecommendedItem> recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(137798, 3);
         System.out.println("user 1");
         for (RecommendedItem recommendation : recommendations) {
             System.out.println(recommendation);
         }
 
-        recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(139448, 3);
-        System.out.println("user 2");
-        for (RecommendedItem recommendation : recommendations) {
-            System.out.println(recommendation);
-        }
-
-        try {
-            recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(138442, 3);
-            System.out.println("user 3");
-            for (RecommendedItem recommendation : recommendations) {
-                System.out.println(recommendation);
-            }
-        } catch (Throwable t) {
-            System.out.println("throwing " + t);
-        }
+//        recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(139448, 3);
+//        System.out.println("user 2");
+//        for (RecommendedItem recommendation : recommendations) {
+//            System.out.println(recommendation);
+//        }
+//
+//        try {
+//            recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(138442, 3);
+//            System.out.println("user 3");
+//            for (RecommendedItem recommendation : recommendations) {
+//                System.out.println(recommendation);
+//            }
+//        } catch (Throwable t) {
+//            System.out.println("throwing " + t);
+//        }
     }
 }

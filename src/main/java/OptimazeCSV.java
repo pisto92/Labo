@@ -7,7 +7,7 @@ import java.util.HashMap;
 public class OptimazeCSV {
 
 
-    static HashMap<String, String> genres = new HashMap<String, String>();
+    static Genres genres;
     static String csvFile = "dati/dataset.csv"; //movieId,title,genre,userId,rating,id,avg
     static BufferedReader br = null;
     static String line = "";
@@ -16,10 +16,7 @@ public class OptimazeCSV {
     static String outputFilePath = "dati/datasetProcessed.csv";
 
     public static void main(String[] args) throws IOException {
-
-
-        populateGenres();
-
+        genres= new Genres();
         processCSV(outputFilePath);
 
         //userId-genre-rating
@@ -84,31 +81,10 @@ public class OptimazeCSV {
         System.out.println("Done");
     }
 
-    private static void populateGenres() {
-        genres.put("Drama", "1");
-        genres.put("Comedy", "2");
-        genres.put("Crime", "3");
-        genres.put("Action", "4");
-        genres.put("Thriller", "5");
-        genres.put("Children", "6");
-        genres.put("Adventure", "7");
-        genres.put("Fantasy", "8");
-        genres.put("Romance", "9");
-        genres.put("Horror", "10");
-        genres.put("Mystery", "11");
-        genres.put("Animation", "12");
-        genres.put("Sci-Fi", "13");
-        genres.put("Documentary", "14");
-        genres.put("Western", "15");
-        genres.put("Musical", "16");
-        genres.put("Film-Noir", "17");
-        genres.put("War", "18");
-        genres.put("\'(no genres listed)\'", "19");
-    }
+
 
     private static String getCodeGenre(String genre) {
-        System.out.println(genre);
-        return genres.get(genre);
+        return genres.getIdByGenre(genre);
     }
 
     private static String getZeroOrOne(double rating, double average) {

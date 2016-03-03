@@ -3,17 +3,15 @@
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.*;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
-import org.apache.mahout.cf.taste.impl.eval.AbstractDifferenceRecommenderEvaluator;
-import org.apache.mahout.cf.taste.impl.eval.AverageAbsoluteDifferenceRecommenderEvaluator;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveArrayIterator;
+import org.apache.mahout.cf.taste.impl.common.LongPrimitiveIterator;
 import org.apache.mahout.cf.taste.impl.eval.GenericRecommenderIRStatsEvaluator;
-import org.apache.mahout.cf.taste.impl.eval.RMSRecommenderEvaluator;
 import org.apache.mahout.cf.taste.impl.model.GenericBooleanPrefDataModel;
 import org.apache.mahout.cf.taste.impl.model.file.FileDataModel;
-import org.apache.mahout.cf.taste.impl.neighborhood.NearestNUserNeighborhood;
 import org.apache.mahout.cf.taste.impl.neighborhood.ThresholdUserNeighborhood;
-import org.apache.mahout.cf.taste.impl.recommender.GenericBooleanPrefUserBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericItemBasedRecommender;
 import org.apache.mahout.cf.taste.impl.recommender.GenericUserBasedRecommender;
+import org.apache.mahout.cf.taste.impl.recommender.TopItems;
 import org.apache.mahout.cf.taste.impl.similarity.LogLikelihoodSimilarity;
 import org.apache.mahout.cf.taste.impl.similarity.PearsonCorrelationSimilarity;
 import org.apache.mahout.cf.taste.model.DataModel;
@@ -21,7 +19,6 @@ import org.apache.mahout.cf.taste.model.PreferenceArray;
 import org.apache.mahout.cf.taste.neighborhood.UserNeighborhood;
 import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
-import org.apache.mahout.cf.taste.recommender.UserBasedRecommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
 
@@ -29,35 +26,43 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 public class EvaluateRecommander {
 
     private static DataModel trainingModel;
     private static DataModel recommendationModel;
     private static RecommenderEvaluator averageEvaluator;
-    private static RecommenderIRStatsEvaluator genericEvaluator;
-    private static RecommenderBuilder recommenderBuilder;
+    private static RecommenderIRStatsEvaluator evaluator;
+    private static RecommenderBuilder recommenderUserBased;
     private static DataModelBuilder modelBuilder;
+    private static RecommenderBuilder recommenderItemBased;
+    private static GenericBooleanPrefDataModel GB;
 
-    public static void main(String[] args) throws IOException, TasteException {
+    public static void main(String[] args) throws Exception {
         afterPropertiesSet();
         testData();
+        testTopItems();
     }
 
     public static void afterPropertiesSet() throws IOException, TasteException {
 
         trainingModel = new FileDataModel(new File("dati/userId-genreId-rating0-5.csv"));
 
-        recommendationModel = new FileDataModel(new File("dati/userId-genreId-rating0-5.csv"));
+        recommendationModel = new FileDataModel(new File("dati/testFilm"));
 
-        averageEvaluator = new AverageAbsoluteDifferenceRecommenderEvaluator();
-        genericEvaluator = new GenericRecommenderIRStatsEvaluator();
+        evaluator = new GenericRecommenderIRStatsEvaluator();
 
-
-        recommenderBuilder = new RecommenderBuilder() {
+        recommenderUserBased = new RecommenderBuilder() {
             public Recommender buildRecommender(DataModel model) throws TasteException {
-//                UserSimilarity similarity = new PearsonCorrelationSimilarity(trainingModel);
-//                UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, model);
-//                return new GenericUserBasedRecommender(model, neighborhood, similarity);
+                UserSimilarity similarity = new PearsonCorrelationSimilarity(trainingModel);
+                UserNeighborhood neighborhood = new ThresholdUserNeighborhood(0.1, similarity, model);
+                return new GenericUserBasedRecommender(model, neighborhood, similarity);
+            }
+        };
+
+        recommenderItemBased = new RecommenderBuilder() {
+            public Recommender buildRecommender(DataModel model) throws TasteException {
                 ItemSimilarity similarity = new LogLikelihoodSimilarity(trainingModel);
                 return new GenericItemBasedRecommender(model, similarity);
             }
@@ -65,19 +70,22 @@ public class EvaluateRecommander {
 
         modelBuilder = new DataModelBuilder() {
             public DataModel buildDataModel(FastByIDMap<PreferenceArray> trainingData) {
-                return new GenericBooleanPrefDataModel(GenericBooleanPrefDataModel.toDataMap(trainingData));
+                GB = new GenericBooleanPrefDataModel(GenericBooleanPrefDataModel.toDataMap(trainingData));
+                return GB;
             }
         };
     }
 
     private static void evaluateStats() throws TasteException {
-        double scoreAverage = averageEvaluator.evaluate(recommenderBuilder, modelBuilder, trainingModel, 0.8, 1.0);
-        System.out.println("Score AverageAbsoluteDifferenceRecommenderEvaluator: " + scoreAverage);
 
         try {
-            IRStatistics stats = genericEvaluator.evaluate(recommenderBuilder, modelBuilder, trainingModel, null, 7, 0.0, 1.0);
-            System.out.println("Recall GenericRecommenderIRStatsEvaluator: " + stats.getRecall());
-            System.out.println("Precision GenericRecommenderIRStatsEvaluator: " + stats.getPrecision());
+            IRStatistics stats = evaluator.evaluate(recommenderUserBased, modelBuilder, trainingModel, null, 7, 0.0, 0.8);
+            System.out.println("Recall ItemBased: " + stats.getRecall());
+            System.out.println("Precision ItemBased: " + stats.getPrecision());
+
+            IRStatistics stats2 = evaluator.evaluate(recommenderItemBased, modelBuilder, recommendationModel, null, 7, 0.0, 0.8);
+            System.out.println("Recall UserBased: " + stats2.getRecall());
+            System.out.println("Precision UserBased: " + stats2.getPrecision());
         } catch (Throwable t) {
             System.out.println("throwing " + t);
         }
@@ -87,26 +95,23 @@ public class EvaluateRecommander {
 
         evaluateStats();
 
-        List<RecommendedItem> recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(137798, 3);
-        System.out.println("user 1");
-        for (RecommendedItem recommendation : recommendations) {
-            System.out.println(recommendation);
+
+        LongPrimitiveIterator iterator = trainingModel.getUserIDs();
+        while (iterator.hasNext()) {
+            List<RecommendedItem> recommendations = recommenderUserBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
+            System.out.print(iterator.nextLong() + " => [ ");
+            for (RecommendedItem recommendation : recommendations) {
+                System.out.print(recommendation.getItemID());
+                System.out.print(" ");
+            }
+            System.out.println("]");
+
         }
 
-//        recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(139448, 3);
-//        System.out.println("user 2");
-//        for (RecommendedItem recommendation : recommendations) {
-//            System.out.println(recommendation);
-//        }
-//
-//        try {
-//            recommendations = recommenderBuilder.buildRecommender(recommendationModel).recommend(138442, 3);
-//            System.out.println("user 3");
-//            for (RecommendedItem recommendation : recommendations) {
-//                System.out.println(recommendation);
-//            }
-//        } catch (Throwable t) {
-//            System.out.println("throwing " + t);
-//        }
+    }
+
+    public static void testTopItems() throws Exception {
+
+
     }
 }

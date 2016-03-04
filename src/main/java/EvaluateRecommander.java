@@ -50,7 +50,15 @@ public class EvaluateRecommander {
 
     public static void afterPropertiesSet() throws IOException, TasteException {
 
-        trainingModel = new FileDataModel(new File("dati/userId-genreId-rating0-5.csv"));
+
+        /*
+        * provare con file userId, filmId, rating
+        * creare un file con id film, titolo film, genere
+        * creare struttura con id film, [titolo, genere]
+        * creare preferenze per id film
+        * fare controllo incrociato tra film e genere predetti tra i due reccomandation system
+        */
+        trainingModel = new FileDataModel(new File("dati/userId-genreId-rating0-5cc.csv"));
 
         recommendationModel = new FileDataModel(new File("dati/testFilm"));
 
@@ -82,13 +90,13 @@ public class EvaluateRecommander {
     private static void evaluateStats() throws TasteException {
 
         try {
-            IRStatistics stats = evaluator.evaluate(recommenderUserBased, modelBuilder, trainingModel, null, 7, 0.0, 0.8);
-            System.out.println("Recall ItemBased: " + stats.getRecall());
+            IRStatistics stats = evaluator.evaluate(recommenderUserBased, modelBuilder, recommendationModel, null, 8, 5, 1);
             System.out.println("Precision ItemBased: " + stats.getPrecision());
+            System.out.println("Recall ItemBased: " + stats.getRecall());
 
-            IRStatistics stats2 = evaluator.evaluate(recommenderItemBased, modelBuilder, recommendationModel, null, 7, 0.0, 0.8);
-            System.out.println("Recall UserBased: " + stats2.getRecall());
+            IRStatistics stats2 = evaluator.evaluate(recommenderItemBased, modelBuilder, recommendationModel, null, 8, 5, 1);
             System.out.println("Precision UserBased: " + stats2.getPrecision());
+            System.out.println("Recall UserBased: " + stats2.getRecall());
         } catch (Throwable t) {
             System.out.println("throwing " + t);
         }
@@ -100,12 +108,12 @@ public class EvaluateRecommander {
 
 
         LongPrimitiveIterator iterator = trainingModel.getUserIDs();
-        while (iterator.hasNext()) {
+        for (int i = 0; i < 10; i++) {
             List<RecommendedItem> recommendationsUserBased = recommenderUserBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
-            List<RecommendedItem> recommendationsItemBased = recommenderItemBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
-            System.out.println(iterator.nextLong());
+            //List<RecommendedItem> recommendationsItemBased = recommenderItemBased.buildRecommender(recommendationModel).recommend(iterator.nextLong(), 3);
+            System.out.print(iterator.nextLong() + " => ");
             printUserBaseRecommendation(recommendationsUserBased);
-            printItemBaseRecommendation(recommendationsItemBased);
+            //printItemBaseRecommendation(recommendationsItemBased);
         }
 
     }

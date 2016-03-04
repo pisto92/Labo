@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 
 public class OptimazeCSV {
@@ -20,8 +17,26 @@ public class OptimazeCSV {
         processCSV(outputFilePath);
 
         //userId-genre-rating
-        generateCSV("dati/userId-genreId-rating0-5.csv", true);
+        generateCSV("dati/userId-genreId-rating0-5cc.csv", true);
         generateCSV("dati/userId-genreId-rating0-1.csv", false);
+
+        //movieId-title-genre
+        generateMoviesCsv("dati/movies.csv");
+    }
+
+    private static void generateMoviesCsv(String output) throws IOException {
+        pv = new PrintWriter(output, "UTF-8");
+        br = new BufferedReader(new FileReader(outputFilePath));
+
+        while ((line = br.readLine()) != null) {
+
+            String[] lineSplitted = line.split(cvsSplitBy);
+            pv.println(lineSplitted[0] + "," +
+                    lineSplitted[1] + "," +
+                    lineSplitted[2]);
+        }
+        pv.close();
+        System.out.println("Done");
     }
 
     private static void processCSV(String outputFilePath) throws IOException {

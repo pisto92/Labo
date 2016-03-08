@@ -11,3 +11,38 @@ Precision ItemBased: 0.9027777777777779
 Recall ItemBased: 0.8125000000000001
 Precision UserBased: 0.8653846153846154
 Recall UserBased: 0.8653846153846154
+
+137802 => Movies: [ Drama Comedy Romance Action Action Drama Action Drama Action Action Sci-Fi Adventure Horror Action Action Comedy Drama Action Comedy Adventure Adventure Action Drama Comedy Western Drama Drama Action Action Animation ]
+137802 => Genre: [ Film-Noir Romance ]
+Moviegenre Drama
+Genre Film-Noir
+Genre Romance
+Moviegenre Comedy
+Genre Film-Noir
+Genre Romance
+Moviegenre Romance
+Genre Film-Noir
+Genre Romance
+137802 => 'Big Country The (1958)'
+
+
+138456 => 'Retroactive (1997)'
+138457 => 'Fire on the Mountain (1996)'
+138460 => 'Black Girl (La noire de...) (1966)'
+138462 => 'Going Clear: Scientology and the Prison of Belief (2015)'
+138464 => 'Jiro Dreams of Sushi (2011)'
+138465 => 'Obsession (1976)'
+138466 => 'Coup de torchon (Clean Slate) (1981)'
+138468 => 'Fido (2006)'
+
+
+Inizio: Tue Mar 08 21:19:31 CET 2016
+Numreccomantation: 551
+Fine: Tue Mar 08 21:27:58 CET 2016
+
+movieModel.getNumUsers() 696
+movieModel.getNumItems() 8241
+genreModel.getNumUsers() 696
+genreModel.getNumItems() 19
+
+

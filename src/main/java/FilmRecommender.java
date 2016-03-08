@@ -1,5 +1,3 @@
-
-
 import org.apache.mahout.cf.taste.common.TasteException;
 import org.apache.mahout.cf.taste.eval.*;
 import org.apache.mahout.cf.taste.impl.common.FastByIDMap;
@@ -19,9 +17,8 @@ import org.apache.mahout.cf.taste.recommender.RecommendedItem;
 import org.apache.mahout.cf.taste.recommender.Recommender;
 import org.apache.mahout.cf.taste.similarity.ItemSimilarity;
 import org.apache.mahout.cf.taste.similarity.UserSimilarity;
-
 import java.io.File;
-import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 
@@ -35,8 +32,13 @@ public class FilmRecommender {
     private static Genres genres;
     private static Movies movies;
     private static FileDataModel movieModel, genreModel;
+    private static int numRecommendation=0;
 
     public static void main(String[] args) throws Exception {
+
+
+        System.out.println("Inizio: " + new Date().toString());
+
         genres = new Genres();
         movies = new Movies();
 
@@ -52,10 +54,18 @@ public class FilmRecommender {
         movieModel = new FileDataModel(new File("dati/userId-movieId-rating.csv"));
         genreModel = new FileDataModel(new File("dati/userId-genreId-rating.csv"));
 
+        System.out.println("movieModel.getNumUsers() "+movieModel.getNumUsers());
+        System.out.println("movieModel.getNumItems() "+movieModel.getNumItems());
+        System.out.println("genreModel.getNumUsers() "+genreModel.getNumUsers());
+        System.out.println("genreModel.getNumItems() "+genreModel.getNumItems());
+
         testMovies(movieModel);
         testGenre(genreModel);
 
         extractRecommendation();
+
+        System.out.println("Numreccomantation: "+numRecommendation);
+        System.out.println("Fine: "+ new Date().toString());
 
     }
 
@@ -76,30 +86,56 @@ public class FilmRecommender {
             }
         };
 
-        LongPrimitiveIterator iterator = movieModel.getUserIDs();
-        while (iterator.hasNext()) {
-            List<RecommendedItem> recommendationsUserBased = recommenderItemBased.buildRecommender(movieModel).recommend(iterator.nextLong(), 30);
-            if (recommendationsUserBased.size() > 20) {
-                System.out.print(iterator.nextLong() + " => ");
-                System.out.print("Movies: [ ");
-                for (RecommendedItem recommendation : recommendationsUserBased) {
-                    System.out.print(movies.getGenreById("" + recommendation.getItemID()));
-                    System.out.print(" ");
-                }
-                System.out.println("]");
-            }
-        }
+        LongPrimitiveIterator iterator3 = movieModel.getUserIDs();
+        while (iterator3.hasNext()) {
+            long userId = iterator3.nextLong();
+            boolean found = false;
+            List<RecommendedItem> recommendationsMovies = recommenderItemBased.buildRecommender(movieModel).recommend(userId, 30);
 
-        LongPrimitiveIterator iterator2 = genreModel.getUserIDs();
-        for (int i = 0; i < 10; i++) {
-            List<RecommendedItem> recommendationsUserBased = recommenderUserBased.buildRecommender(genreModel).recommend(iterator2.nextLong(), 6);
-            System.out.print(iterator2.nextLong() + " => ");
-            System.out.print("Genre: [ ");
-            for (RecommendedItem recommendation : recommendationsUserBased) {
-                System.out.print(genres.getGenreById("" + recommendation.getItemID()));
-                System.out.print(" ");
+
+//            if (recommendationsMovies.size() > 20) {
+//                System.out.print(userId + " => ");
+//                System.out.print("Movies: [ ");
+//                for (RecommendedItem recommendation : recommendationsMovies) {
+//                    System.out.print(movies.getGenreById("" + recommendation.getItemID()));
+//                    System.out.print(" ");
+//                }
+//                System.out.println("]");
+//            }
+//
+//
+            List<RecommendedItem> recommendationsGenres = recommenderUserBased.buildRecommender(genreModel).recommend(userId, 6);
+//            System.out.print(userId + " => ");
+//            System.out.print("Genre: [ ");
+//            for (RecommendedItem recommendation : recommendationsGenres) {
+//                System.out.print(genres.getGenreById("" + recommendation.getItemID()));
+//                System.out.print(" ");
+//            }
+//            System.out.println("]");
+
+
+
+            if (recommendationsMovies.size() > 20 && recommendationsGenres.size() > 0) {
+
+                for (RecommendedItem recommendedMovies : recommendationsMovies) {
+                    if (!found) {
+                        String moviesGenre = movies.getGenreById("" + recommendedMovies.getItemID());
+//                        System.out.println("######### " + moviesGenre.toUpperCase() + " #########");
+
+                        for (RecommendedItem recommendedGenre : recommendationsGenres) {
+                            String genre = genres.getGenreById("" + recommendedGenre.getItemID());
+                            if (moviesGenre.equals(genre)) {
+                                System.out.print(userId + " => ");
+                                System.out.println("" + movies.getTitleById(""+recommendedMovies.getItemID()));
+                                numRecommendation+=1;
+                                found = true;
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
             }
-            System.out.println("]");
         }
     }
 
@@ -141,14 +177,6 @@ public class FilmRecommender {
         };
 
         evaluateStats(movieModel);
-    }
-
-    private static void printUserBaseRecommendationGenre(List<RecommendedItem> recommendationsUserBased) {
-
-    }
-
-    private static void printItemBaseRecommendationMovies(List<RecommendedItem> recommendationsUserBased) {
-
     }
 
     private static void evaluateStats(DataModel dataModel) throws TasteException {

@@ -12,8 +12,8 @@ public class Movies {
     static String line = "";
     static String cvsSplitBy = ",";
     int ID = 0;
-    int GENRE = 1;
-    int TITLE = 2;
+    int GENRE = 2;
+    int TITLE = 1;
 
     public Movies() throws IOException {
         readGenreFromFile();

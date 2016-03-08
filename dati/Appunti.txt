@@ -1,0 +1,13 @@
+Con dataset 100K
+
+Movies:
+Precision ItemBased: 0.02754820936639118
+Recall ItemBased: 0.01814882032667875
+Precision UserBased: 0.02090669014084507
+Recall UserBased: 0.02090669014084507
+
+Genre
+Precision ItemBased: 0.9027777777777779
+Recall ItemBased: 0.8125000000000001
+Precision UserBased: 0.8653846153846154
+Recall UserBased: 0.8653846153846154

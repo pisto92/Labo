@@ -1,7 +1,6 @@
 import java.io.*;
-import java.util.HashMap;
 
-public class OptimazeCSV {
+public class CSVHelper {
 
 
     static Genres genres;
@@ -17,26 +16,13 @@ public class OptimazeCSV {
         processCSV(outputFilePath);
 
         //userId-genre-rating
-        generateCSV("dati/userId-genreId-rating0-5cc.csv", true);
-        generateCSV("dati/userId-genreId-rating0-1.csv", false);
+        generateGenreCSV("dati/userId-genreId-rating.csv", true);
+        generateGenreCSV("dati/userId-genreId-rating0-1.csv", false);
 
-        //movieId-title-genre
-        generateMoviesCsv("dati/movies.csv");
-    }
+        //userId-movieId-rating
+        generateMovieCSV("dati/userId-movieId-rating.csv", true);
+        generateMovieCSV("dati/userId-movieId-rating0-1.csv", false);
 
-    private static void generateMoviesCsv(String output) throws IOException {
-        pv = new PrintWriter(output, "UTF-8");
-        br = new BufferedReader(new FileReader(outputFilePath));
-
-        while ((line = br.readLine()) != null) {
-
-            String[] lineSplitted = line.split(cvsSplitBy);
-            pv.println(lineSplitted[0] + "," +
-                    lineSplitted[1] + "," +
-                    lineSplitted[2]);
-        }
-        pv.close();
-        System.out.println("Done");
     }
 
     private static void processCSV(String outputFilePath) throws IOException {
@@ -69,10 +55,10 @@ public class OptimazeCSV {
         }
 
         pv.close();
-        System.out.println("Done");
+        System.out.println("Done datasetProcessed");
     }
 
-    private static void generateCSV(String output, boolean ratingTypeOriginal) throws IOException {
+    private static void generateGenreCSV(String output, boolean ratingTypeOriginal) throws IOException {
         pv = new PrintWriter(output, "UTF-8");
         br = new BufferedReader(new FileReader(outputFilePath));
 
@@ -93,7 +79,31 @@ public class OptimazeCSV {
                     lineToWrite[2]);
         }
         pv.close();
-        System.out.println("Done");
+        System.out.println("Done userId-genreId-rating");
+    }
+
+    private static void generateMovieCSV(String output, boolean ratingTypeOriginal) throws IOException {
+        pv = new PrintWriter(output, "UTF-8");
+        br = new BufferedReader(new FileReader(outputFilePath));
+
+        while ((line = br.readLine()) != null) {
+
+            String[] lineSplitted = line.split(cvsSplitBy);
+            String[] lineToWrite = new String[3];
+
+            lineToWrite[0] = lineSplitted[4];
+            lineToWrite[1] = lineSplitted[0];
+            if (ratingTypeOriginal)
+                lineToWrite[2] = lineSplitted[5];
+            else
+                lineToWrite[2] = lineSplitted[7];
+
+            pv.println(lineToWrite[0] + "," +
+                    lineToWrite[1] + "," +
+                    lineToWrite[2]);
+        }
+        pv.close();
+        System.out.println("Done userId-movieId-rating");
     }
 
 

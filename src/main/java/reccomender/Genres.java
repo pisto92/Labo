@@ -1,3 +1,5 @@
+package reccomender;
+
 import java.io.*;
 import java.util.HashMap;
 
@@ -21,7 +23,7 @@ public class Genres{
             String[] lineSplitted = line.split(cvsSplitBy);
             genres.put(lineSplitted[KEY], lineSplitted[VALUE]);
         }
-        System.out.println("Genres loaded");
+        System.out.println("reccomender.Genres loaded");
     }
 
 

@@ -1,3 +1,5 @@
+package reccomender;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -25,7 +27,7 @@ public class Movies {
             String[] lineSplitted = line.split(cvsSplitBy);
             movies.put(lineSplitted[ID], new String[]{lineSplitted[GENRE], lineSplitted[TITLE]});
         }
-        System.out.println("Movies loaded");
+        System.out.println("reccomender.Movies loaded");
     }
 
     public String getGenreById(String id) {
